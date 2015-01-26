@@ -50,18 +50,13 @@ static NSUInteger timout = 10;
 
 #pragma mark - Setup
 
-- (NSMutableData *)encodeRequestParams:(NSDictionary *)params {
-    NSMutableDictionary *postBodyParams = [NSMutableDictionary dictionary];
-    
-    if (params) {
-        [postBodyParams setValuesForKeysWithDictionary:params];
+- (NSData *)encodeRequestParams:(NSDictionary *)params {
+    NSString *postString = @"";
+    for (NSString *key in params.allKeys) {
+        if  (postString.length>0) postString = [postString stringByAppendingString:@"&"];
+        postString = [postString stringByAppendingString:[NSString stringWithFormat:@"%@=%@",key,[params objectForKey:key]]];
     }
-    
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:postBodyParams options:0 error:nil];
-    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    
-    NSString *encodedParamsAsJson = [self encodeString:jsonString];
-    NSMutableData *postData = [NSMutableData dataWithData:[encodedParamsAsJson dataUsingEncoding:NSUTF8StringEncoding]];
+    NSData *postData = [postString dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     return postData;
 }
 
@@ -75,8 +70,12 @@ static NSUInteger timout = 10;
     [request setTimeoutInterval:timout];
     
     if (params) {
-        NSMutableData *postData = [self encodeRequestParams:params];
+        NSData *postData = [self encodeRequestParams:params];
         [request setHTTPBody:postData];
+        
+        NSString *postLength = [NSString stringWithFormat:@"%lu", (unsigned long)[postData length]];
+        [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+        [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     }
     
     self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
