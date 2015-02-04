@@ -23,9 +23,9 @@ static NSUInteger timout = 10;
 
 @implementation BullKit
 
+@synthesize urlString = _urlString;
 @synthesize apiUrl = _apiUrl;
 @synthesize delegate = _delegate;
-@synthesize connection = _connection;
 @synthesize responseData = _responseData;
 @synthesize userInfo = _userInfo;
 @synthesize responseString = _responseString;
@@ -63,9 +63,9 @@ static NSUInteger timout = 10;
 - (void)callApiMethod:(NSString *)method withParams:(NSDictionary *)params {
     [self cancel];
     
-    NSString *urlString = [NSString stringWithFormat:self.apiUrl, method];
+    self.urlString = [NSString stringWithFormat:self.apiUrl, method];
     
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:urlString]];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:self.urlString]];
     [request setHTTPMethod:@"POST"];
     [request setTimeoutInterval:timout];
     
@@ -78,9 +78,9 @@ static NSUInteger timout = 10;
         [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     }
     
-    self.connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
-    [self.connection scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
-    [self.connection start];
+    NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
+    [connection scheduleInRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    [connection start];
 }
 
 - (void)getDepthTable {
@@ -177,25 +177,9 @@ static NSUInteger timout = 10;
     return encodedString;
 }
 
-#pragma mark - Tear down
-
-- (void)cancel {
-    if (self.connection) {
-        [self.connection cancel];
-    }
-    
-    [self cleanup];
-}
-
 - (void)cleanup {
-    self.connection = nil;
     [self.responseData setLength:0];
 }
-
-- (void)dealloc {
-    [self cleanup];
-}
-
 #pragma mark - Internal
 
 + (NSString*) convertToString:(tradeType) tradeType {

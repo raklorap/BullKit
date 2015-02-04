@@ -30,11 +30,10 @@
     SEL onFailure;
     
     NSString *apiUrl;
-    
+    NSString *urlString;
     id userInfo;
     
 @private
-    NSURLConnection *connection;
     NSMutableData *responseData;
 }
 
@@ -43,12 +42,12 @@ typedef enum {
     Sell
 }tradeType;
 
+@property (nonatomic, strong) NSString *urlString;
 @property (unsafe_unretained, readwrite) id<BullKitDelegate> delegate;
 @property (nonatomic, strong) id userInfo;
 
 @property (nonatomic, strong) NSString *apiUrl;
 
-@property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, strong) NSMutableData *responseData;
 
 @property (nonatomic, readonly) NSString *responseString;
@@ -58,7 +57,6 @@ typedef enum {
 + (void)setTimeout:(NSUInteger)tout;
 
 - (id)initWithDelegate:(id)aDelegate;
-- (void)cancel;
 
 - (void)getDepthTable;
 - (void)getMarketTicker;
